@@ -5,6 +5,7 @@ const roleSchema = new mongoose.Schema({
   roleName: {
     type: String,
     required: true, // Le nom du rôle est obligatoire
+    unique: true,
     trim: true, // Supprime les espaces inutiles
     minlength: 3, // Longueur minimale de 3 caractères
     maxlength: 50, // Longueur maximale de 50 caractères
