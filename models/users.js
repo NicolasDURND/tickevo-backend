@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const uid2 = require('uid2');
 const bcrypt = require('bcrypt');
 
-const usersSchema = mongoose.Schema({
+const userSchema = mongoose.Schema({
     username: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     token: { type: String, default: () => uid2(32) },
