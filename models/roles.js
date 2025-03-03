@@ -2,29 +2,12 @@ const mongoose = require("mongoose");
 
 // Définition du schéma pour les rôles
 const roleSchema = new mongoose.Schema({
-  roleName: {
-    type: String,
-    required: true, // Le nom du rôle est obligatoire
-    unique: true,
-    trim: true, // Supprime les espaces inutiles
-    minlength: 3, // Longueur minimale de 3 caractères
-    maxlength: 50, // Longueur maximale de 50 caractères
-  },
-  levelRole: {
-    type: Number,
-    required: true, // Le niveau du rôle est obligatoire
-    min: 0, // Empêche les valeurs négatives
-  },
-  roleDescription: {
-    type: String,
-    trim: true, // Supprime les espaces inutiles
-    minlength: 10, // Description avec au moins 10 caractères
-    maxlength: 255, // Description limitée à 255 caractères
-  },
-}, { timestamps: true }); // Ajoute les champs createdAt et updatedAt automatiquement
+    roleName: { type: String, required: true, unique: true, trim: true, minlength: 3, maxlength: 50 },
+    levelRole: { type: Number, required: true, min: 0 },
+    roleDescription: { type: String, trim: true, minlength: 10, maxlength: 255 },
+}, { timestamps: true }); // Ajoute createdAt et updatedAt automatiquement
 
-// Création du modèle "Role" basé sur le schéma
+// Création du modèle "Roles" basé sur le schéma
 const Role = mongoose.model("roles", roleSchema);
 
-module.exports = Role; // Export du modèle pour utilisation dans le projet
-
+module.exports = Role;
