@@ -4,7 +4,7 @@ const bcrypt = require('bcrypt');
 
 const userSchema = mongoose.Schema({
     username: { type: String, required: true, unique: true },
-    password: { type: String, required: true, unique: true },
+    password: { type: String, required: true, unique: true }, 
     token: { type: String, default: () => uid2(32) },
     roleId: { type: mongoose.Schema.Types.ObjectId, ref: "roles", required: true },
     serviceId: { type: mongoose.Schema.Types.ObjectId, ref: "services" },
