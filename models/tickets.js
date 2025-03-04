@@ -15,7 +15,7 @@ const commentSchema = new mongoose.Schema({
 
 // Schéma principal des tickets
 const ticketSchema = new mongoose.Schema({
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: "users", required: true },
+    user: { type: mongoose.Schema.Types.ObjectId, ref: "users", required: true },
     ticketNumber: { type: Number, required: true, unique: true },
     title: { type: String, required: true },
     description: { type: String, required: true },
