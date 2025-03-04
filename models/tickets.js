@@ -8,14 +8,14 @@ const subcategorySchema = new mongoose.Schema({
 
 // Schéma pour les commentaires des tickets
 const commentSchema = new mongoose.Schema({
-    user: { type: mongoose.Schema.Types.ObjectId, ref: "users", required: true },
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: "users", required: true },
     message: { type: String, required: true },
     timestamp: { type: Date, default: Date.now },
 });
 
 // Schéma principal des tickets
 const ticketSchema = new mongoose.Schema({
-    user: { type: mongoose.Schema.Types.ObjectId, ref: "users", required: true },
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: "users", required: true },
     ticketNumber: { type: Number, required: true, unique: true },
     title: { type: String, required: true },
     description: { type: String, required: true },
