@@ -18,4 +18,31 @@ router.get("/last", async (req, res) => {
   }
 });
 
+// Route pour créer un nouveau ticket
+router.post("/", async (req, res) => {
+  try {
+    const { title, description, category } = req.body;
+
+    if (!title || !description || !category) {
+      return res.status(400).json({ message: "Tous les champs sont requis" });
+    }
+
+    const newTicket = new Ticket({
+      title,
+      description,
+      category,
+      status: "ouvert", // Un ticket commence avec le statut "ouvert"
+      createdAt: new Date(),
+    });
+
+    await newTicket.save();
+    res
+      .status(201)
+      .json({ message: "Ticket créé avec succès", ticket: newTicket });
+  } catch (error) {
+    console.error("Erreur lors de la création du ticket :", error);
+    res.status(500).json({ message: "Erreur serveur", error });
+  }
+});
+
 module.exports = router;
