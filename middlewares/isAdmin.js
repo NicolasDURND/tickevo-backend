@@ -1,7 +1,7 @@
 const User = require("../models/users");
 
 // Middleware pour authentifier via token et vérifier le rôle
-const isEmployeeOrTechnicianOrAdmin = async (req, res, next) => {
+const isAdmin = async (req, res, next) => {
   const token = req.headers.authorization?.replace("Bearer ", "");
 
   if (!token) {
@@ -34,4 +34,4 @@ const isEmployeeOrTechnicianOrAdmin = async (req, res, next) => {
   }
 };
 
-module.exports = isEmployeeOrTechnicianOrAdmin;
+module.exports = isAdmin;
