@@ -68,37 +68,44 @@ router.post("/signupAdmin", isAdmin, async (req, res) => {
 });
 
 // Route de connexion (signin)
-router.post('/signin', async (req, res) => {
+router.post("/signin", async (req, res) => {
+  const { username, password } = req.body;
+
+  if (!username || !password) {
+    return res.status(400).json({ error: "Missing fields" });
+  }
+
   try {
-      if (!checkBody(req.body, ['username', 'password'])) {
-          return res.status(400).json({ result: false, error: 'Missing or empty fields' });
-      }
+    const user = await User.findOne({ username });
 
-      // Vérifier si l'utilisateur existe et récupérer son mot de passe
-      const user = await User.findOne({ username: req.body.username }).select("+password").populate('roleId');
-      
-      if (!user) {
-          return res.status(404).json({ result: false, error: 'User not found' });
-      }
+    if (!user) {
+      return res.status(401).json({ error: "Utilisateur introuvable" });
+    }
 
-      console.log("Mot de passe stocké en base:", user.password); // Vérifie que le mot de passe est bien récupéré
+    const isPasswordValid = await bcrypt.compare(password, user.password);
 
-      // Vérifier le mot de passe
-      if (!user.password || !bcrypt.compareSync(req.body.password, user.password)) {
-          return res.status(401).json({ result: false, error: 'Wrong password' });
-      }
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: "Mot de passe incorrect" });
+    }
 
-      res.status(200).json({ 
-          result: true, 
-          token: user.token, 
-          role: user.roleId.roleName,
-          userId: user._id
-      });
+    // ✅ Génération d’un nouveau token pour cet utilisateur
+    const newToken = uid2(32);
+    user.token = newToken; // ✅ Mise à jour du token en base
+    await user.save(); // ✅ Sauvegarde du token en BDD
+
+    res.status(200).json({
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        token: newToken, // ✅ On renvoie bien le token au frontend
+      },
+    });
   } catch (error) {
-      console.error('Error in signin:', error);
-      res.status(500).json({ result: false, error: 'Internal server error' });
+    res.status(500).json({ error: "Erreur serveur" });
   }
 });
+
 
 // Route d'inscription (signup) // Sans middleware --> A SUPPRIMER EN FIN DE PROJET
 router.post("/signup", async (req, res) => {
@@ -153,19 +160,6 @@ router.post("/signup", async (req, res) => {
   } catch (error) {
     console.error("Error in signup:", error);
     res.status(500).json({ result: false, error: "Internal server error" });
-  }
-});
-
-// Route de déconnexion
-router.post("/logout", isEmployeeOrTechnicienOrAdmin, async (req, res) => {
-  try {
-    // Mettre à jour le token de l'utilisateur à null pour invalider la session
-    await User.findByIdAndUpdate(req.user._id, { token: null });
-
-    res.status(200).json({ result: true, message: "Déconnexion réussie" });
-  } catch (error) {
-    console.error("Erreur lors de la déconnexion :", error);
-    res.status(500).json({ result: false, error: "Erreur serveur" });
   }
 });
 
