@@ -9,6 +9,7 @@ const Service = require("../models/services");
 const { checkBody } = require("../modules/checkBody");
 const bcrypt = require("bcrypt");
 const isAdmin = require("../middlewares/isAdmin"); // Import du middleware admin;
+const isEmployeeOrTechnicienOrAdmin = require("../middlewares/isEmployeeOrTechnicienOrAdmin");
 
 // Route de création d'un utilisateur par un admin
 router.post("/signupAdmin", isAdmin, async (req, res) => {
@@ -152,6 +153,19 @@ router.post("/signup", async (req, res) => {
   } catch (error) {
     console.error("Error in signup:", error);
     res.status(500).json({ result: false, error: "Internal server error" });
+  }
+});
+
+// Route de déconnexion
+router.post("/logout", isEmployeeOrTechnicienOrAdmin, async (req, res) => {
+  try {
+    // Mettre à jour le token de l'utilisateur à null pour invalider la session
+    await User.findByIdAndUpdate(req.user._id, { token: null });
+
+    res.status(200).json({ result: true, message: "Déconnexion réussie" });
+  } catch (error) {
+    console.error("Erreur lors de la déconnexion :", error);
+    res.status(500).json({ result: false, error: "Erreur serveur" });
   }
 });
 
