@@ -51,7 +51,6 @@ router.post("/signupAdmin", isAdmin, async (req, res) => {
       username: req.body.username,
       password: req.body.password, // Le mot de passe sera haché automatiquement avant l'enregistrement
       email: req.body.email,
-      token: uid2(32),
       roleId: role._id,
       serviceId: service ? service._id : null,
       createdBy: req.user._id, // Assignation de l'admin qui crée l'utilisateur
@@ -147,7 +146,6 @@ router.post("/signup", async (req, res) => {
       username: req.body.username,
       password: req.body.password, // Le mot de passe sera haché automatiquement avant l'enregistrement
       email: req.body.email,
-      token: uid2(32),
       roleId: role._id,
       serviceId: service ? service._id : null,
       createdBy: "self", // L'utilisateur se crée lui-même
