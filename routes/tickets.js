@@ -4,7 +4,7 @@ const Ticket = require("../models/tickets");
 const isEmployeeOrTechnicianOrAdmin = require("../middlewares/isEmployeeOrTechnicienOrAdmin"); // ✅ Middleware existant
 
 // ✅ Route pour créer un nouveau ticket et l'enregistrer dans MongoDB Atlas
-router.post("/", async (req, res) => {
+router.post("/", isEmployeeOrTechnicianOrAdmin, async (req, res) => {
   try {
     const { title, description, category, subcategories, createdBy, userId } =
       req.body;
