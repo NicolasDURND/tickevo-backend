@@ -20,7 +20,7 @@ const isEmployeeOrTechnicianOrAdmin = async (req, res, next) => {
     const allowedRoleIds = [
       "67c5cfc16f453c87fb23c607", // Administrateur
       "67c5cfc16f453c87fb23c609", // Technicien
-      "67c5cfc16f453c87fb23c60b"  // Utilisateur (Employé)
+      "67c5cfc16f453c87fb23c60b", // Utilisateur (Employé)
     ];
 
     // Vérification de l'appartenance à un rôle autorisé
@@ -28,7 +28,8 @@ const isEmployeeOrTechnicianOrAdmin = async (req, res, next) => {
       return res.status(403).json({ error: "Accès refusé, rôle non autorisé" });
     }
 
-    req.user = user; // Injecte l'utilisateur dans la requête
+    req.user = { _id: user._id, roleId: user.roleId }; // ✅ Ajouté pour s'assurer que req.user._id est bien défini
+
     next(); // Passe au middleware suivant
   } catch (error) {
     console.error("Erreur lors de la vérification du token:", error);
