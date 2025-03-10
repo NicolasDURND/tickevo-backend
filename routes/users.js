@@ -16,19 +16,25 @@ router.post("/signupAdmin", isAdmin, async (req, res) => {
   try {
     // Vérifier les champs obligatoires
     if (!checkBody(req.body, ["username", "password", "email", "roleId"])) {
-      return res.status(400).json({ result: false, error: "Missing or empty fields" });
+      return res
+        .status(400)
+        .json({ result: false, error: "Missing or empty fields" });
     }
 
     // Vérifier si le username existe déjà
     const existingUser = await User.findOne({ username: req.body.username });
     if (existingUser) {
-      return res.status(409).json({ result: false, error: "Username already exists" });
+      return res
+        .status(409)
+        .json({ result: false, error: "Username already exists" });
     }
 
     // Vérifier si l'email existe déjà
     const existingEmail = await User.findOne({ email: req.body.email });
     if (existingEmail) {
-      return res.status(409).json({ result: false, error: "Email already in use" });
+      return res
+        .status(409)
+        .json({ result: false, error: "Email already in use" });
     }
 
     // Vérifier si le rôle existe
@@ -42,7 +48,9 @@ router.post("/signupAdmin", isAdmin, async (req, res) => {
     if (req.body.serviceId) {
       service = await Service.findById(req.body.serviceId);
       if (!service) {
-        return res.status(400).json({ result: false, error: "Invalid service" });
+        return res
+          .status(400)
+          .json({ result: false, error: "Invalid service" });
       }
     }
 
@@ -58,8 +66,11 @@ router.post("/signupAdmin", isAdmin, async (req, res) => {
 
     await newUser.save();
 
-    res.status(201).json({ result: true, message: "User created successfully", userId: newUser._id });
-
+    res.status(201).json({
+      result: true,
+      message: "User created successfully",
+      userId: newUser._id,
+    });
   } catch (error) {
     console.error("Error in create-user:", error);
     res.status(500).json({ result: false, error: "Internal server error" });
@@ -75,14 +86,16 @@ router.post("/signin", async (req, res) => {
   }
 
   try {
-    const user = await User.findOne({ username });
+    const user = await User.findOne({ username }).populate(
+      "roleId",
+      "roleName"
+    ); // ✅ Ajoute `populate`
 
     if (!user) {
       return res.status(401).json({ error: "Utilisateur introuvable" });
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
-
     if (!isPasswordValid) {
       return res.status(401).json({ error: "Mot de passe incorrect" });
     }
@@ -97,7 +110,8 @@ router.post("/signin", async (req, res) => {
         id: user._id,
         username: user.username,
         email: user.email,
-        token: newToken, // ✅ On renvoie bien le token au frontend
+        roleId: user.roleId ? user.roleId.roleName : null, // ✅ Ajoute `roleName`
+        token: newToken, // ✅ Retourne le token
       },
     });
   } catch (error) {
@@ -105,25 +119,30 @@ router.post("/signin", async (req, res) => {
   }
 });
 
-
 // Route d'inscription (signup) // Sans middleware --> A SUPPRIMER EN FIN DE PROJET
 router.post("/signup", async (req, res) => {
   try {
     // Vérifier les champs obligatoires
     if (!checkBody(req.body, ["username", "password", "email", "roleId"])) {
-      return res.status(400).json({ result: false, error: "Missing or empty fields" });
+      return res
+        .status(400)
+        .json({ result: false, error: "Missing or empty fields" });
     }
 
     // Vérifier si le username existe déjà
     const existingUser = await User.findOne({ username: req.body.username });
     if (existingUser) {
-      return res.status(409).json({ result: false, error: "Username already exists" });
+      return res
+        .status(409)
+        .json({ result: false, error: "Username already exists" });
     }
 
     // Vérifier si l'email existe déjà
     const existingEmail = await User.findOne({ email: req.body.email });
     if (existingEmail) {
-      return res.status(409).json({ result: false, error: "Email already in use" });
+      return res
+        .status(409)
+        .json({ result: false, error: "Email already in use" });
     }
 
     // Vérifier si le rôle existe
@@ -137,7 +156,9 @@ router.post("/signup", async (req, res) => {
     if (req.body.serviceId) {
       service = await Service.findById(req.body.serviceId);
       if (!service) {
-        return res.status(400).json({ result: false, error: "Invalid service" });
+        return res
+          .status(400)
+          .json({ result: false, error: "Invalid service" });
       }
     }
 
@@ -153,8 +174,9 @@ router.post("/signup", async (req, res) => {
 
     await newUser.save();
 
-    res.status(201).json({ result: true, token: newUser.token, userId: newUser._id });
-
+    res
+      .status(201)
+      .json({ result: true, token: newUser.token, userId: newUser._id });
   } catch (error) {
     console.error("Error in signup:", error);
     res.status(500).json({ result: false, error: "Internal server error" });

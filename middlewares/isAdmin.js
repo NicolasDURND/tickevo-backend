@@ -18,7 +18,7 @@ const isAdmin = async (req, res, next) => {
 
     // Définition des rôles autorisés avec leurs ID
     const allowedRoleIds = [
-      "67c5cfc16f453c87fb23c607", // Administrateur
+      "67ce260d68a51411a303d0c5", // Administrateur
     ];
 
     // Vérification de l'appartenance à un rôle autorisé
