@@ -2,6 +2,20 @@ const express = require("express");
 const router = express.Router();
 const Ticket = require("../models/tickets");
 const isEmployeeOrTechnicianOrAdmin = require("../middlewares/isEmployeeOrTechnicienOrAdmin"); // ✅ Middleware existant
+const isTechnicianOrAdmin = require("../middlewares/isTechnicianOrAdmin"); // Middleware d'accès
+
+// ✅ Route pour récupérer tous les tickets (Techniciens & Admins uniquement)
+router.get("/", isTechnicianOrAdmin, async (req, res) => {
+  try {
+    const tickets = await Ticket.find().populate("userId", "username"); // ✅ Suppression de email
+
+    res.json({ success: true, tickets });
+  } catch (error) {
+    console.error("Erreur lors de la récupération des tickets :", error);
+    res.status(500).json({ success: false, message: "Erreur serveur" });
+  }
+});
+
 
 // ✅ Route pour créer un nouveau ticket et l'enregistrer dans MongoDB Atlas
 router.post("/", isEmployeeOrTechnicianOrAdmin, async (req, res) => {
