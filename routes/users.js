@@ -183,4 +183,105 @@ router.post("/signup", async (req, res) => {
   }
 });
 
+// 🔥 Route GET pour récupérer tous les rôles
+router.get("/roles", isAdmin, async (req, res) => {
+  try {
+    const roles = await Role.find({}, "_id roleName"); // Ne récupère que l'ID et le nom du rôle
+    res.json({ roles }); // ✅ Retourne un objet avec la clé "roles"
+  } catch (error) {
+    console.error("Erreur lors de la récupération des rôles :", error);
+    res.status(500).json({ error: "Erreur serveur lors de la récupération des rôles" });
+  }
+});
+
+// 🔥 Route GET pour récupérer tous les services
+router.get("/services", isAdmin, async (req, res) => {
+  try {
+    const services = await Service.find({}, "_id serviceName"); // Ne récupère que l'ID et le nom du service
+    res.json({ services }); // ✅ Retourne un objet avec la clé "services"
+  } catch (error) {
+    console.error("Erreur lors de la récupération des services :", error);
+    res.status(500).json({ error: "Erreur serveur lors de la récupération des services" });
+  }
+});
+
+// Route GET pour récupérer tous les utilisateurs
+router.get("/allusers", isAdmin, async (req, res) => {
+  try {
+    const users = await User.find()
+      .populate("roleId", "roleName")
+      .populate("serviceId", "serviceName");
+
+    res.status(200).json({ success: true, users });
+  } catch (error) {
+    console.error("Erreur lors de la récupération des utilisateurs:", error);
+    res.status(500).json({ success: false, message: "Erreur serveur" });
+  }
+});
+
+// 🔥 Route PATCH pour modifier un utilisateur (mise à jour partielle)
+router.patch("/update/:id", isAdmin, async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const updateFields = req.body;
+
+    // ✅ Supprime les champs vides (évite d'écraser avec des valeurs vides)
+    Object.keys(updateFields).forEach((key) => {
+      if (updateFields[key] === "") {
+        delete updateFields[key];
+      }
+    });
+
+    // ✅ Si `serviceId` est vide, on le passe à `null` dans la base de données
+    if (updateFields.serviceId === null || updateFields.serviceId === "") {
+      updateFields.serviceId = null;
+    }
+
+    // ✅ Mise à jour avec `findByIdAndUpdate`
+    const updatedUser = await User.findByIdAndUpdate(userId, updateFields, {
+      new: true, // Retourne l'utilisateur mis à jour
+      runValidators: true, // Applique les validations Mongoose sur les champs modifiés
+    });
+
+    if (!updatedUser) {
+      return res.status(404).json({ success: false, message: "Utilisateur introuvable" });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Utilisateur mis à jour avec succès",
+      user: updatedUser,
+    });
+  } catch (error) {
+    console.error("Erreur lors de la mise à jour de l'utilisateur:", error);
+    res.status(500).json({ success: false, message: "Erreur serveur" });
+  }
+});
+
+// 🔥 Route PATCH pour désactiver/réactiver un utilisateur
+router.patch("/toggle-status/:id", isAdmin, async (req, res) => {
+  try {
+    const userId = req.params.id;
+
+    // ✅ Récupérer l'utilisateur
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "Utilisateur introuvable" });
+    }
+
+    // ✅ Basculer l'état `isActive`
+    user.isActive = !user.isActive;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: `Utilisateur ${user.isActive ? "réactivé" : "désactivé"} avec succès`,
+      isActive: user.isActive,
+    });
+  } catch (error) {
+    console.error("Erreur lors du changement de statut de l'utilisateur:", error);
+    res.status(500).json({ success: false, message: "Erreur serveur" });
+  }
+});
+
 module.exports = router;
