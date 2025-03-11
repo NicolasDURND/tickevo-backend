@@ -82,42 +82,56 @@ router.post("/signin", async (req, res) => {
   const { username, password } = req.body;
 
   if (!username || !password) {
+    console.log("❌ Erreur: Champs manquants");
     return res.status(400).json({ error: "Missing fields" });
   }
 
   try {
-    const user = await User.findOne({ username }).populate(
-      "roleId",
-      "roleName"
-    ); // ✅ Ajoute `populate`
+    console.log(`🔎 Recherche de l'utilisateur : ${username}`);
+    const user = await User.findOne({ username })
+      .select("+isActive")  // ✅ Forcer l'inclusion de isActive
+      .populate("roleId", "roleName");
 
     if (!user) {
-      return res.status(401).json({ error: "Utilisateur introuvable" });
+      console.log("❌ Erreur: Utilisateur introuvable");
+      return res.status(401).json({ error: "Nom d'utilisateur ou mot de passe incorrect" });
     }
 
+    console.log(`👤 Utilisateur trouvé : ${user.username}, isActive: ${user.isActive}`);
+
+    if (!user.isActive) {
+      console.log("❌ Utilisateur désactivé, accès refusé.");
+      return res.status(403).json({ error: "Connexion impossible, contactez votre administrateur." });
+    }
+
+    console.log("🔑 Vérification du mot de passe...");
     const isPasswordValid = await bcrypt.compare(password, user.password);
+
     if (!isPasswordValid) {
-      return res.status(401).json({ error: "Mot de passe incorrect" });
+      console.log("❌ Mot de passe incorrect");
+      return res.status(401).json({ error: "Nom d'utilisateur ou mot de passe incorrect" });
     }
 
-    // ✅ Génération d’un nouveau token pour cet utilisateur
+    console.log("✅ Connexion réussie, génération du token...");
     const newToken = uid2(32);
-    user.token = newToken; // ✅ Mise à jour du token en base
-    await user.save(); // ✅ Sauvegarde du token en BDD
+    user.token = newToken;
+    await user.save();
 
     res.status(200).json({
       user: {
         id: user._id,
         username: user.username,
         email: user.email,
-        roleId: user.roleId ? user.roleId.roleName : null, // ✅ Ajoute `roleName`
-        token: newToken, // ✅ Retourne le token
+        roleId: user.roleId ? user.roleId.roleName : null,
+        token: newToken,
       },
     });
   } catch (error) {
+    console.error("❌ Erreur serveur lors de la connexion:", error);
     res.status(500).json({ error: "Erreur serveur" });
   }
 });
+
 
 // Route d'inscription (signup) // Sans middleware --> A SUPPRIMER EN FIN DE PROJET
 router.post("/signup", async (req, res) => {
@@ -183,7 +197,7 @@ router.post("/signup", async (req, res) => {
   }
 });
 
-// 🔥 Route GET pour récupérer tous les rôles
+// Route GET pour récupérer tous les rôles
 router.get("/roles", isAdmin, async (req, res) => {
   try {
     const roles = await Role.find({}, "_id roleName"); // Ne récupère que l'ID et le nom du rôle
@@ -194,7 +208,7 @@ router.get("/roles", isAdmin, async (req, res) => {
   }
 });
 
-// 🔥 Route GET pour récupérer tous les services
+// Route GET pour récupérer tous les services
 router.get("/services", isAdmin, async (req, res) => {
   try {
     const services = await Service.find({}, "_id serviceName"); // Ne récupère que l'ID et le nom du service
@@ -219,7 +233,7 @@ router.get("/allusers", isAdmin, async (req, res) => {
   }
 });
 
-// 🔥 Route PATCH pour modifier un utilisateur (mise à jour partielle)
+// Route PATCH pour modifier un utilisateur (mise à jour partielle)
 router.patch("/update/:id", isAdmin, async (req, res) => {
   try {
     const userId = req.params.id;
@@ -258,7 +272,7 @@ router.patch("/update/:id", isAdmin, async (req, res) => {
   }
 });
 
-// 🔥 Route PATCH pour désactiver/réactiver un utilisateur
+// Route PATCH pour désactiver/réactiver un utilisateur
 router.patch("/toggle-status/:id", isAdmin, async (req, res) => {
   try {
     const userId = req.params.id;
