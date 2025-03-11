@@ -9,6 +9,7 @@ const logger = require("morgan");
 const indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
 var ticketsRoutes = require("./routes/tickets");
+var ticketsTechnicienRoutes = require("./routes/ticketsTechnicien");
 
 const app = express();
 
@@ -22,6 +23,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/tickets", ticketsRoutes);
+app.use("/ticketsTechnicien", ticketsTechnicienRoutes);
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
 
