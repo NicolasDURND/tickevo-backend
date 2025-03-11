@@ -7,7 +7,9 @@ const isTechnicianOrAdmin = require("../middlewares/isTechnicianOrAdmin"); // Mi
 // ✅ Route pour récupérer tous les tickets (Techniciens & Admins uniquement)
 router.get("/", isTechnicianOrAdmin, async (req, res) => {
   try {
-    const tickets = await Ticket.find().populate("userId", "username"); // ✅ Suppression de email
+    const tickets = await Ticket.find()
+    .populate("userId", "username")
+    .populate("assignedTo", "username"); 
 
     res.json({ success: true, tickets });
   } catch (error) {
