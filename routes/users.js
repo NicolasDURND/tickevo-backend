@@ -246,7 +246,13 @@ router.patch("/update/:id", isAdmin, async (req, res) => {
       }
     });
 
-    // ✅ Si `serviceId` est vide, on le passe à `null` dans la base de données
+    // ✅ Si un nouveau mot de passe est fourni, on le hache avant la mise à jour
+    if (updateFields.password) {
+      const salt = await bcrypt.genSalt(10);
+      updateFields.password = await bcrypt.hash(updateFields.password, salt);
+    }
+
+    // ✅ Si `serviceId` est vide, on le passe à `null`
     if (updateFields.serviceId === null || updateFields.serviceId === "") {
       updateFields.serviceId = null;
     }
@@ -271,6 +277,7 @@ router.patch("/update/:id", isAdmin, async (req, res) => {
     res.status(500).json({ success: false, message: "Erreur serveur" });
   }
 });
+
 
 // Route PATCH pour désactiver/réactiver un utilisateur
 router.patch("/toggle-status/:id", isAdmin, async (req, res) => {
