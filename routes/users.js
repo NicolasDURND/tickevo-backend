@@ -298,4 +298,24 @@ router.patch("/toggle-status/:id", isAdmin, async (req, res) => {
   }
 });
 
+// ✅ Route pour récupérer un utilisateur par son ID
+router.get("/:id", async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id)
+      .populate("roleId", "roleName") // Récupère les infos du rôle
+      .populate("serviceId", "serviceName"); // Récupère les infos du service
+
+    if (!user) {
+      return res.status(404).json({ error: "Utilisateur introuvable" });
+    }
+
+    res.status(200).json(user);
+  } catch (error) {
+    console.error("Erreur lors de la récupération de l'utilisateur:", error);
+    res.status(500).json({ error: "Erreur serveur" });
+  }
+});
+
+module.exports = router;
+
 module.exports = router;
