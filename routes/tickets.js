@@ -8,8 +8,8 @@ const isTechnicianOrAdmin = require("../middlewares/isTechnicianOrAdmin"); // Mi
 router.get("/", isTechnicianOrAdmin, async (req, res) => {
   try {
     const tickets = await Ticket.find()
-    .populate("userId", "username")
-    .populate("assignedTo", "username"); 
+      .populate("userId", "username")
+      .populate("assignedTo", "username");
 
     res.json({ success: true, tickets });
   } catch (error) {
@@ -17,7 +17,6 @@ router.get("/", isTechnicianOrAdmin, async (req, res) => {
     res.status(500).json({ success: false, message: "Erreur serveur" });
   }
 });
-
 
 // ✅ Route pour créer un nouveau ticket et l'enregistrer dans MongoDB Atlas
 router.post("/", isEmployeeOrTechnicianOrAdmin, async (req, res) => {
@@ -88,21 +87,22 @@ router.get("/last", isEmployeeOrTechnicianOrAdmin, async (req, res) => {
   }
 });
 
-router.get("/:id", async (req, res) => {
+// 🔹 Récupérer un ticket spécifique avec les commentaires ET les usernames
+router.get("/:id", isTechnicianOrAdmin, async (req, res) => {
   try {
-    const ticket = await Ticket.findById(req.params.id).populate(
-      "createdBy",
-      "username"
-    );
+    const ticket = await Ticket.findById(req.params.id)
+      .populate("userId", "username") // Récupérer le username du créateur du ticket
+      .populate("assignedTo", "username") // Récupérer le username du technicien
+      .populate("comments.userId", "username"); // ✅ Récupérer le username des commentaires
 
     if (!ticket) {
-      return res.status(404).json({ message: "Ticket non trouvé" });
+      return res.status(404).json({ error: "Ticket non trouvé" });
     }
 
-    res.status(200).json(ticket);
+    res.json(ticket);
   } catch (error) {
-    console.error("❌ Erreur lors de la récupération du ticket :", error);
-    res.status(500).json({ message: "Erreur serveur", error });
+    console.error("Erreur récupération ticket:", error);
+    res.status(500).json({ error: "Erreur serveur" });
   }
 });
 
