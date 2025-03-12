@@ -87,7 +87,7 @@ router.get("/last", isEmployeeOrTechnicianOrAdmin, async (req, res) => {
   }
 });
 
-// 🔹 Récupérer un ticket spécifique avec les commentaires ET les usernames
+// 🔹 Récupérer un ticket spécifique avec les commentaires ET les usernamessssss
 router.get("/:id", isTechnicianOrAdmin, async (req, res) => {
   try {
     const ticket = await Ticket.findById(req.params.id)
