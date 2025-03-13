@@ -66,6 +66,7 @@ router.post("/", isEmployeeOrTechnicianOrAdmin, async (req, res) => {
     res.status(500).json({ message: "Erreur serveur", error });
   }
 });
+
 // ✅ Récupérer les 10 derniers tickets de l'utilisateur connecté
 router.get("/last", isEmployeeOrTechnicianOrAdmin, async (req, res) => {
   try {
@@ -74,7 +75,8 @@ router.get("/last", isEmployeeOrTechnicianOrAdmin, async (req, res) => {
     const tickets = await Ticket.find({ createdBy: userId }) // ✅ Filtre par utilisateur connecté
       .sort({ createdAt: -1 }) // ✅ Trie du plus récent au plus ancien
       .limit(10)
-      .populate("createdBy", "username"); // ✅ Récupère le nom du créateur
+      .populate("createdBy", "username")
+      .populate("comments.userId", "username");
 
     if (!tickets.length) {
       return res.status(404).json({ message: "Aucun ticket trouvé" });
