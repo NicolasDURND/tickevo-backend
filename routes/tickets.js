@@ -93,9 +93,10 @@ router.get("/last", isEmployeeOrTechnicianOrAdmin, async (req, res) => {
 router.get("/:id", isTechnicianOrAdmin, async (req, res) => {
   try {
     const ticket = await Ticket.findById(req.params.id)
-      .populate("userId", "username") // Récupérer le username du créateur du ticket
-      .populate("assignedTo", "username") // Récupérer le username du technicien
-      .populate("comments.userId", "username"); // ✅ Récupérer le username des commentaires
+      .populate("createdBy", "username")
+      .populate("userId", "username")
+      .populate("assignedTo", "username")
+      .populate("comments.userId", "username");
 
     if (!ticket) {
       return res.status(404).json({ error: "Ticket non trouvé" });
@@ -107,5 +108,6 @@ router.get("/:id", isTechnicianOrAdmin, async (req, res) => {
     res.status(500).json({ error: "Erreur serveur" });
   }
 });
+
 
 module.exports = router;
