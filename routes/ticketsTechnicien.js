@@ -9,6 +9,7 @@ router.get("/service", isTechnicianOrAdmin, async (req, res) => {
     const tickets = await Ticket.find({ assignedTo: null })
       .populate('userId', 'username')
       .populate('assignedTo', 'username');
+      
     res.json(tickets);
   } catch (error) {
     res.status(500).json({ error: "Erreur serveur" });
@@ -88,7 +89,7 @@ router.post("/:id/comment", isTechnicianOrAdmin, async (req, res) => {
       req.params.id,
       { $push: { comments: { userId, message, timestamp: new Date() } } },
       { new: true }
-    );
+    ).populate("comments.userId", "username");
     res.json(updatedTicket);
   } catch (error) {
     res.status(500).json({ error: "Erreur serveur" });
