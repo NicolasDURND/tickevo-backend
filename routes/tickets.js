@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Ticket = require("../models/tickets");
-const isEmployeeOrTechnicianOrAdmin = require("../middlewares/isEmployeeOrTechnicienOrAdmin"); // ✅ Middleware existant
+const isEmployeeOrTechnicianOrAdmin = require("../middlewares/isEmployeeOrTechnicianOrAdmin"); // ✅ Middleware existant
 const isTechnicianOrAdmin = require("../middlewares/isTechnicianOrAdmin"); // Middleware d'accès
 
 // ✅ Route pour récupérer tous les tickets (Techniciens & Admins uniquement)

@@ -9,7 +9,7 @@ const Service = require("../models/services");
 const { checkBody } = require("../modules/checkBody");
 const bcrypt = require("bcrypt");
 const isAdmin = require("../middlewares/isAdmin"); // Import du middleware admin;
-const isEmployeeOrTechnicienOrAdmin = require("../middlewares/isEmployeeOrTechnicienOrAdmin");
+const isEmployeeOrTechnicianOrAdmin = require("../middlewares/isEmployeeOrTechnicianOrAdmin");
 
 // Route de création d'un utilisateur par un admin
 router.post("/signupAdmin", isAdmin, async (req, res) => {
