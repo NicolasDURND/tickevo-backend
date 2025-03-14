@@ -306,7 +306,7 @@ router.patch("/toggle-status/:id", isAdmin, async (req, res) => {
 });
 
 // ✅ Route pour récupérer un utilisateur par son ID
-router.get("/:id", async (req, res) => {
+router.get("/:id", isAdmin, async (req, res) => {
   try {
     const user = await User.findById(req.params.id)
       .populate("roleId", "roleName") // Récupère les infos du rôle
@@ -322,7 +322,5 @@ router.get("/:id", async (req, res) => {
     res.status(500).json({ error: "Erreur serveur" });
   }
 });
-
-module.exports = router;
 
 module.exports = router;
