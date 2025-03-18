@@ -17,12 +17,6 @@ beforeAll(async () => {
   global.roleId = role._id;
 });
 
-afterAll(async () => {
-  await User.deleteMany({});
-  await Role.deleteMany({});
-  await mongoose.connection.close();
-});
-
 describe("POST /signup", () => {
   it("Refuse si un champ obligatoire est manquant", async () => {
     const res = await request(app).post("/users/signup").send({

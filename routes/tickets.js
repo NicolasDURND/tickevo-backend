@@ -1,50 +1,47 @@
 const express = require("express");
 const router = express.Router();
 const Ticket = require("../models/tickets");
-const isEmployeeOrTechnicianOrAdmin = require("../middlewares/isEmployeeOrTechnicianOrAdmin"); // ✅ Middleware existant
-const isTechnicianOrAdmin = require("../middlewares/isTechnicianOrAdmin"); // Middleware d'accès
+const isEmployeeOrTechnicianOrAdmin = require("../middlewares/isEmployeeOrTechnicianOrAdmin"); // Droits employés, techniciens ou admin
+const isTechnicianOrAdmin = require("../middlewares/isTechnicianOrAdmin"); // Droits techniciens ou admin
 
-// ✅ Route pour récupérer tous les tickets (Techniciens & Admins uniquement)
+// GET "/" - Récupère tous les tickets (techniciens & admin)
 router.get("/", isTechnicianOrAdmin, async (req, res) => {
   try {
+    // Récupère tous les tickets et ajoute les usernames
     const tickets = await Ticket.find()
-      .populate("userId", "username")
-      .populate("assignedTo", "username");
+      .populate("userId", "username") // Ajoute le username de l'auteur
+      .populate("assignedTo", "username"); // Ajoute le username du technicien assigné
 
-    res.json({ success: true, tickets });
+    res.json({ success: true, tickets }); // Renvoie les tickets avec succès
   } catch (error) {
     console.error("Erreur lors de la récupération des tickets :", error);
     res.status(500).json({ success: false, message: "Erreur serveur" });
   }
 });
 
-// ✅ Route pour créer un nouveau ticket et l'enregistrer dans MongoDB Atlas
+// POST "/" - Crée un nouveau ticket
 router.post("/", isEmployeeOrTechnicianOrAdmin, async (req, res) => {
   try {
-    const { title, description, category, subcategories, createdBy, userId } =
-      req.body;
+    // Extrait les infos du corps de la requête
+    const { title, description, category, subcategories, createdBy, userId } = req.body;
 
-    // ✅ Vérifier que tous les champs obligatoires sont présents
+    // Vérifie que tous les champs essentiels sont présents
     if (!title || !description || !category || !createdBy || !userId) {
       return res.status(400).json({ message: "Tous les champs sont requis" });
     }
 
-    // ✅ Vérifier si la catégorie est correcte
+    // Vérifie que la catégorie est "Demande" ou "Incident"
     if (!["Demande", "Incident"].includes(category)) {
-      return res.status(400).json({
-        message: "Catégorie invalide. Choisissez 'Demande' ou 'Incident'.",
-      });
+      return res.status(400).json({ message: "Catégorie invalide. Choisissez 'Demande' ou 'Incident'." });
     }
 
-    // ✅ Générer un numéro unique pour le ticket
+    // Génère un numéro unique pour le ticket
     const ticketNumber = Math.floor(100000 + Math.random() * 900000);
 
-    // ✅ Vérifier si subcategories est bien un tableau pour les incidents
-    const formattedSubcategories = Array.isArray(subcategories)
-      ? subcategories
-      : [];
+    // Assure que subcategories est un tableau, sinon vide
+    const formattedSubcategories = Array.isArray(subcategories) ? subcategories : [];
 
-    // ✅ Création du ticket avec le bon format
+    // Crée le ticket avec les infos fournies
     const newTicket = new Ticket({
       title,
       description,
@@ -53,27 +50,26 @@ router.post("/", isEmployeeOrTechnicianOrAdmin, async (req, res) => {
       ticketNumber,
       createdBy,
       userId,
-      status: "en cours",
+      status: "en cours", // Statut par défaut
     });
 
-    // ✅ Sauvegarde du ticket dans la base de données
+    // Sauvegarde le ticket en base
     await newTicket.save();
-    res
-      .status(201)
-      .json({ message: "Ticket créé avec succès", ticket: newTicket });
+    res.status(201).json({ message: "Ticket créé avec succès", ticket: newTicket });
   } catch (error) {
     console.error("❌ Erreur lors de la création du ticket :", error);
     res.status(500).json({ message: "Erreur serveur", error });
   }
 });
 
-// ✅ Récupérer les 10 derniers tickets de l'utilisateur connecté
+// GET "/last" - Récupère les 10 derniers tickets de l'utilisateur connecté
 router.get("/last", isEmployeeOrTechnicianOrAdmin, async (req, res) => {
   try {
-    const userId = req.user._id; // ✅ L'utilisateur connecté via le token
+    const userId = req.user._id; // ID de l'utilisateur connecté via le token
 
-    const tickets = await Ticket.find({ createdBy: userId }) // ✅ Filtre par utilisateur connecté
-      .sort({ createdAt: -1 }) // ✅ Trie du plus récent au plus ancien
+    // Récupère et trie les tickets du plus récent au plus ancien, limite à 10
+    const tickets = await Ticket.find({ createdBy: userId })
+      .sort({ createdAt: -1 })
       .limit(10)
       .populate("createdBy", "username")
       .populate("comments.userId", "username");
@@ -89,9 +85,10 @@ router.get("/last", isEmployeeOrTechnicianOrAdmin, async (req, res) => {
   }
 });
 
-// 🔹 Récupérer un ticket spécifique avec les commentaires ET les usernamessssss
+// GET "/:id" - Récupère un ticket spécifique avec ses commentaires et usernames
 router.get("/:id", isEmployeeOrTechnicianOrAdmin, async (req, res) => {
   try {
+    // Cherche le ticket par son ID et ajoute les usernames liés
     const ticket = await Ticket.findById(req.params.id)
       .populate("createdBy", "username")
       .populate("userId", "username")
@@ -108,6 +105,5 @@ router.get("/:id", isEmployeeOrTechnicianOrAdmin, async (req, res) => {
     res.status(500).json({ error: "Erreur serveur" });
   }
 });
-
 
 module.exports = router;

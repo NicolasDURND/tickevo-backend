@@ -1,52 +1,43 @@
 const mongoose = require("mongoose");
 
-// Schéma pour les sous-catégories des tickets
+// Schéma de sous-catégorie : niveau et nom de la sous-catégorie
 const subcategorySchema = new mongoose.Schema({
   subCategoryLevel: { type: Number, required: true },
   subCategoryName: { type: String, required: true },
 });
 
-// Schéma pour les commentaires des tickets
+// Schéma de commentaire : utilisateur, message et date
 const commentSchema = new mongoose.Schema({
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "users",
-    required: true,
-  },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "users", required: true },
   message: { type: String, required: true },
   timestamp: { type: Date, default: Date.now },
 });
 
-// Schéma principal des tickets
+// Schéma principal du ticket
 const ticketSchema = new mongoose.Schema(
   {
-    userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "users",
-      required: true,
-    },
+    // Utilisateur qui crée le ticket
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: "users", required: true },
+    // Numéro unique du ticket
     ticketNumber: { type: Number, required: true, unique: true },
+    // Titre et description du ticket
     title: { type: String, required: true },
     description: { type: String, required: true },
-    status: {
-      type: String,
-      enum: ["en cours", "en attente", "clôturé"],
-      default: "en cours",
-    },
-    createdBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "users",
-      required: true,
-    },
+    // Statut du ticket
+    status: { type: String, enum: ["en cours", "en attente", "clôturé"], default: "en cours" },
+    // Créateur et technicien assigné
+    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "users", required: true },
     assignedTo: { type: mongoose.Schema.Types.ObjectId, ref: "users" },
+    // Catégorie du ticket
     category: { type: String, enum: ["Demande", "Incident"], required: true },
+    // Sous-catégories et commentaires
     subcategories: [subcategorySchema],
     comments: [commentSchema],
   },
-  { timestamps: true }
+  { timestamps: true } // Ajoute createdAt et updatedAt
 );
 
-// Création du modèle "Tickets" basé sur le schéma
+// Création du modèle "Ticket"
 const Ticket = mongoose.model("tickets", ticketSchema);
 
 module.exports = Ticket;

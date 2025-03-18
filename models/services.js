@@ -1,12 +1,12 @@
 const mongoose = require("mongoose");
 
-// Définition du schéma pour les services
+// Schéma des services
 const serviceSchema = new mongoose.Schema({
     serviceName: { type: String, required: true, trim: true, minlength: 3, maxlength: 50 },
     serviceDescription: { type: String, required: true, trim: true, minlength: 10, maxlength: 255 },
-}, { timestamps: true });
+}, { timestamps: true }); // Ajoute createdAt et updatedAt
 
-// Création du modèle "Services" basé sur le schéma
+// Modèle Service basé sur ce schéma
 const Service = mongoose.model("services", serviceSchema);
 
 module.exports = Service;
