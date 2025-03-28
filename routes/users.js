@@ -133,69 +133,69 @@ router.post("/signin", async (req, res) => {
 });
 
 
-// Route d'inscription (signup) // Sans middleware --> A SUPPRIMER EN FIN DE PROJET
-router.post("/signup", async (req, res) => {
-  try {
-    // Vérifier les champs obligatoires
-    if (!checkBody(req.body, ["username", "password", "email", "roleId"])) {
-      return res
-        .status(400)
-        .json({ result: false, error: "Missing or empty fields" });
-    }
+// // Route d'inscription (signup) // Sans middleware --> A SUPPRIMER EN FIN DE PROJET
+// router.post("/signup", async (req, res) => {
+//   try {
+//     // Vérifier les champs obligatoires
+//     if (!checkBody(req.body, ["username", "password", "email", "roleId"])) {
+//       return res
+//         .status(400)
+//         .json({ result: false, error: "Missing or empty fields" });
+//     }
 
-    // Vérifier si le username existe déjà
-    const existingUser = await User.findOne({ username: req.body.username });
-    if (existingUser) {
-      return res
-        .status(409)
-        .json({ result: false, error: "Username already exists" });
-    }
+//     // Vérifier si le username existe déjà
+//     const existingUser = await User.findOne({ username: req.body.username });
+//     if (existingUser) {
+//       return res
+//         .status(409)
+//         .json({ result: false, error: "Username already exists" });
+//     }
 
-    // Vérifier si l'email existe déjà
-    const existingEmail = await User.findOne({ email: req.body.email });
-    if (existingEmail) {
-      return res
-        .status(409)
-        .json({ result: false, error: "Email already in use" });
-    }
+//     // Vérifier si l'email existe déjà
+//     const existingEmail = await User.findOne({ email: req.body.email });
+//     if (existingEmail) {
+//       return res
+//         .status(409)
+//         .json({ result: false, error: "Email already in use" });
+//     }
 
-    // Vérifier si le rôle existe
-    const role = await Role.findById(req.body.roleId);
-    if (!role) {
-      return res.status(400).json({ result: false, error: "Invalid role" });
-    }
+//     // Vérifier si le rôle existe
+//     const role = await Role.findById(req.body.roleId);
+//     if (!role) {
+//       return res.status(400).json({ result: false, error: "Invalid role" });
+//     }
 
-    // Vérifier si le service existe (facultatif)
-    let service = null;
-    if (req.body.serviceId) {
-      service = await Service.findById(req.body.serviceId);
-      if (!service) {
-        return res
-          .status(400)
-          .json({ result: false, error: "Invalid service" });
-      }
-    }
+//     // Vérifier si le service existe (facultatif)
+//     let service = null;
+//     if (req.body.serviceId) {
+//       service = await Service.findById(req.body.serviceId);
+//       if (!service) {
+//         return res
+//           .status(400)
+//           .json({ result: false, error: "Invalid service" });
+//       }
+//     }
 
-    // Création de l'utilisateur (hachage géré dans le modèle avec pre("save"))
-    const newUser = new User({
-      username: req.body.username,
-      password: req.body.password, // Le mot de passe sera haché automatiquement avant l'enregistrement
-      email: req.body.email,
-      roleId: role._id,
-      serviceId: service ? service._id : null,
-      createdBy: "self", // L'utilisateur se crée lui-même
-    });
+//     // Création de l'utilisateur (hachage géré dans le modèle avec pre("save"))
+//     const newUser = new User({
+//       username: req.body.username,
+//       password: req.body.password, // Le mot de passe sera haché automatiquement avant l'enregistrement
+//       email: req.body.email,
+//       roleId: role._id,
+//       serviceId: service ? service._id : null,
+//       createdBy: "self", // L'utilisateur se crée lui-même
+//     });
 
-    await newUser.save();
+//     await newUser.save();
 
-    res
-      .status(201)
-      .json({ result: true, token: newUser.token, userId: newUser._id });
-  } catch (error) {
-    console.error("Error in signup:", error);
-    res.status(500).json({ result: false, error: "Internal server error" });
-  }
-});
+//     res
+//       .status(201)
+//       .json({ result: true, token: newUser.token, userId: newUser._id });
+//   } catch (error) {
+//     console.error("Error in signup:", error);
+//     res.status(500).json({ result: false, error: "Internal server error" });
+//   }
+// });
 
 // Route GET pour récupérer tous les rôles
 router.get("/roles", isAdmin, async (req, res) => {
